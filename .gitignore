@@ -1,0 +1,14 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+
+# Environment variables - NEVER upload these
+backend/.env
+
+# Mac system files
+.DS_Store
+
+# Node
+frontend/node_modules/
+
