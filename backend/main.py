@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException # importing the FastAPI class from the fastapi module
 from fastapi.middleware.cors import CORSMiddleware 
 from data_fetcher import get_stock_price, get_company_profile, get_financial_statements # importing functions from the data_fetcher module
+from risk_scorer import calculate_risk_score
 
 app = FastAPI() # creating an instance of the FastAPI application
 
@@ -33,11 +34,15 @@ def get_company(ticker: str):
     price_data = get_stock_price(ticker)
     financials = get_financial_statements(ticker)
 
+    risk = calculate_risk_score(financials, price_data, profile)
+
+
     return {
         "profile": profile,
         "price_data": price_data,
         "financials": financials,
+        "risk": risk,
     }   
-    
+
 
 

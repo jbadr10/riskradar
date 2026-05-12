@@ -25,16 +25,15 @@ def get_company_profile(ticker):
     }
 
 def get_stock_price(ticker):
-    url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={ticker}&apikey={AV_KEY}"
-    response = requests.get(url)
-    data = response.json()
-    
-    quote = data.get("Global Quote", {})
+    stock = yf.Ticker(ticker)
+    info = stock.info
     
     return {
-        "price": quote.get("05. price"),
-        "change_percent": quote.get("10. change percent"),
-        "volume": quote.get("06. volume"),
+        "price": info.get("currentPrice"),
+        "change_percent": info.get("52WeekChange"),
+        "volume": info.get("volume"),
+        "fifty_two_week_high": info.get("fiftyTwoWeekHigh"),
+        "fifty_two_week_low": info.get("fiftyTwoWeekLow"),
     }
 
 def get_financial_statements(ticker):
