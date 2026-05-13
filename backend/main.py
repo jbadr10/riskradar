@@ -5,7 +5,6 @@ from risk_scorer import calculate_risk_score
 
 app = FastAPI() # creating an instance of the FastAPI application
 
-
 app.add_middleware( 
 # frontend vs backend communication, allowing cross-origin requests from the 
 # specified origin (localhost:3000)
@@ -44,5 +43,40 @@ def get_company(ticker: str):
         "risk": risk,
     }   
 
+@app.get("/api/compare/{ticker1}/{ticker2}")
+def compare_companies(ticker1: str, ticker2: str):
+    ticker1 = ticker1.upper()
+    ticker2 = ticker2.upper()
+    
+    profile1 = get_company_profile(ticker1)
+    profile2 = get_company_profile(ticker2)
 
+    if not profile1:
+        raise HTTPException(status_code=404, detail=f"Company {ticker1} not found")
+    if not profile2:
+        raise HTTPException(status_code=404, detail=f"Company {ticker2} not found")
+    
+    price_data1 = get_stock_price(ticker1)
+    price_data2 = get_stock_price(ticker2)
+
+    financials1 = get_financial_statements(ticker1)
+    financials2 = get_financial_statements(ticker2)
+
+    risk1 = calculate_risk_score(financials1, price_data1, profile1)
+    risk2 = calculate_risk_score(financials2, price_data2, profile2)
+
+    return {
+        "company1": {
+            "profile": profile1,
+            "price_data": price_data1,
+            "financials": financials1,
+            "risk": risk1,
+        },
+        "company2": {
+            "profile": profile2,
+            "price_data": price_data2,
+            "financials": financials2,
+            "risk": risk2,
+        },
+    }
 
