@@ -95,6 +95,8 @@ function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [recent, setRecent] = useState([]);
+
 
   const [mode, setMode] = useState("single");
   const [ticker1, setTicker1] = useState("");
@@ -113,6 +115,7 @@ function App() {
       if (!response.ok) throw new Error("Company not found. Check the ticker symbol.");
       const result = await response.json();
       setData(result);
+      loadRecent();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -132,11 +135,18 @@ function App() {
       if (!response.ok) throw new Error("One or both companies not found.");
       const result = await response.json();
       setCompareData(result);
+      loadRecent();
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+    const loadRecent = async () => {
+    const response = await fetch("http://127.0.0.1:8000/api/recent");
+    const result = await response.json();
+    setRecent(result);
   };
 
   const compareChartData = compareData ? compareData.company1.financials.map((year, i) => ({
@@ -153,6 +163,21 @@ function App() {
         <h1 style={{ color: "white", margin: "0 0 4px", fontSize: "24px", fontWeight: "700" }}>RiskRadar</h1>
         <p style={{ color: "#8888aa", margin: 0, fontSize: "13px" }}>Public Company Financial Risk Intelligence</p>
       </div>
+
+{recent.length > 0 && (
+        <div style={{ background: "white", padding: "12px 40px", borderBottom: "1px solid #e0e0e0", display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+          <span style={{ fontSize: "13px", color: "#666", fontWeight: "600" }}>Recent:</span>
+          {recent.map((r, i) => (
+            <button
+              key={i}
+              onClick={() => { setTicker(r.ticker); setMode("single"); }}
+              style={{ padding: "4px 12px", borderRadius: "20px", border: "1px solid #ddd", background: "#f8f9fa", fontSize: "13px", cursor: "pointer", color: "#444" }}
+            >
+              {r.ticker} · {r.risk_label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Mode Toggle */}
       <div style={{ background: "white", padding: "20px 40px", borderBottom: "1px solid #e0e0e0" }}>

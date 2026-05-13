@@ -2,8 +2,12 @@ from fastapi import FastAPI, HTTPException # importing the FastAPI class from th
 from fastapi.middleware.cors import CORSMiddleware 
 from data_fetcher import get_stock_price, get_company_profile, get_financial_statements # importing functions from the data_fetcher module
 from risk_scorer import calculate_risk_score
+from database import init_db, save_company, get_recent_searches
+
 
 app = FastAPI() # creating an instance of the FastAPI application
+init_db() # initializing the database by calling the init_db function from the database module
+
 
 app.add_middleware( 
 # frontend vs backend communication, allowing cross-origin requests from the 
@@ -34,6 +38,7 @@ def get_company(ticker: str):
     financials = get_financial_statements(ticker)
 
     risk = calculate_risk_score(financials, price_data, profile)
+    save_company(ticker, profile, price_data, financials, risk)
 
 
     return {
@@ -80,3 +85,6 @@ def compare_companies(ticker1: str, ticker2: str):
         },
     }
 
+@app.get("/api/recent")
+def recent_searches():
+    return get_recent_searches()
