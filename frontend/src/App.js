@@ -143,11 +143,14 @@ function App() {
     }
   };
 
-    const loadRecent = async () => {
+const loadRecent = async () => {
     const response = await fetch("http://127.0.0.1:8000/api/recent");
     const result = await response.json();
-    setRecent(result);
-  };
+    const unique = result.filter((item, index, self) =>
+        index === self.findIndex((r) => r.ticker === item.ticker)
+    );
+    setRecent(unique);
+};
 
   const compareChartData = compareData ? compareData.company1.financials.map((year, i) => ({
     date: year.date.slice(0, 4),
