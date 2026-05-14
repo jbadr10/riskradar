@@ -53,3 +53,19 @@ def get_financial_statements(ticker):
         })
     
     return statements
+
+def get_price_history(ticker):
+    stock = yf.Ticker(ticker)
+    history = stock.history(period="6mo")
+    
+    if history.empty:
+        return []
+    
+    result = []
+    for date, row in history.iterrows():
+        result.append({
+            "date": date.strftime("%Y-%m-%d"),
+            "close": round(row["Close"], 2),
+        })
+    
+    return result

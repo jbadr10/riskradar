@@ -31,32 +31,15 @@ function RiskGauge({ score, label, color }) {
   const gaugeColor = color === "green" ? "#16a34a" : color === "yellow" ? "#d97706" : "#dc2626";
   const bgColor = color === "green" ? "#f0fdf4" : color === "yellow" ? "#fffbeb" : "#fef2f2";
   const borderColor = color === "green" ? "#bbf7d0" : color === "yellow" ? "#fde68a" : "#fecaca";
-
   const radius = 54;
   const circumference = Math.PI * radius;
   const dashOffset = circumference - (percentage / 100) * circumference;
-
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px" }}>
       <div style={{ position: "relative", width: "140px", height: "80px", overflow: "hidden" }}>
         <svg width="140" height="110" viewBox="0 0 140 110">
-          <path
-            d="M 14 84 A 54 54 0 0 1 126 84"
-            fill="none"
-            stroke="#f0f0f0"
-            strokeWidth="12"
-            strokeLinecap="round"
-          />
-          <path
-            d="M 14 84 A 54 54 0 0 1 126 84"
-            fill="none"
-            stroke={gaugeColor}
-            strokeWidth="12"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={dashOffset}
-            style={{ transition: "stroke-dashoffset 1s ease" }}
-          />
+          <path d="M 14 84 A 54 54 0 0 1 126 84" fill="none" stroke="#f0f0f0" strokeWidth="12" strokeLinecap="round" />
+          <path d="M 14 84 A 54 54 0 0 1 126 84" fill="none" stroke={gaugeColor} strokeWidth="12" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={dashOffset} style={{ transition: "stroke-dashoffset 1s ease" }} />
           <text x="70" y="78" textAnchor="middle" fontSize="22" fontWeight="800" fill="#0a0a0a">{score}</text>
           <text x="70" y="94" textAnchor="middle" fontSize="10" fill="#9ca3af">out of {maxScore}</text>
         </svg>
@@ -98,7 +81,6 @@ function CompanyCard({ company }) {
         <div style={{ fontSize: "28px", fontWeight: "800", color: "#0a0a0a", letterSpacing: "-1px", marginBottom: "8px" }}>${company.price_data.price}</div>
         <RiskBadge label={company.risk.label} color={company.risk.color} />
       </div>
-
       <div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px", marginBottom: "14px" }}>
         <div style={{ color: "#9ca3af", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "12px" }}>Risk Assessment</div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
@@ -112,7 +94,6 @@ function CompanyCard({ company }) {
           </div>
         ))}
       </div>
-
       <div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px", marginBottom: "14px" }}>
         <div style={{ color: "#9ca3af", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "16px" }}>Revenue vs Net Income</div>
         <ResponsiveContainer width="100%" height={180}>
@@ -126,7 +107,6 @@ function CompanyCard({ company }) {
           </LineChart>
         </ResponsiveContainer>
       </div>
-
       <div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px" }}>
         <div style={{ color: "#9ca3af", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "12px" }}>Financials</div>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
@@ -240,17 +220,9 @@ function App() {
             Compare
           </button>
         </div>
-
         {mode === "single" ? (
           <>
-            <input
-              type="text"
-              placeholder="Enter ticker (e.g. AAPL, TD, SHOP)"
-              value={ticker}
-              onChange={(e) => setTicker(e.target.value.toUpperCase())}
-              onKeyDown={(e) => e.key === "Enter" && search()}
-              style={{ background: "white", border: "1.5px solid #e5e7eb", color: "#0a0a0a", padding: "10px 14px", borderRadius: "8px", fontSize: "14px", flex: 1, maxWidth: "380px", outline: "none" }}
-            />
+            <input type="text" placeholder="Enter ticker (e.g. AAPL, TD, SHOP)" value={ticker} onChange={(e) => setTicker(e.target.value.toUpperCase())} onKeyDown={(e) => e.key === "Enter" && search()} style={{ background: "white", border: "1.5px solid #e5e7eb", color: "#0a0a0a", padding: "10px 14px", borderRadius: "8px", fontSize: "14px", flex: 1, maxWidth: "380px", outline: "none" }} />
             <button onClick={search} style={{ background: "#2563eb", color: "white", border: "none", padding: "10px 22px", borderRadius: "8px", fontSize: "14px", fontWeight: "700", cursor: "pointer" }}>
               {loading ? "Loading..." : "Analyze"}
             </button>
@@ -295,6 +267,7 @@ function App() {
       {data && (
         <div className="fade-in" style={{ maxWidth: "1000px", margin: "28px auto", padding: "0 24px" }}>
 
+          {/* Company header */}
           <div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px", marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
               <h2 style={{ color: "#0a0a0a", fontSize: "26px", fontWeight: "800", letterSpacing: "-0.5px", marginBottom: "4px" }}>{data.profile.name}</h2>
@@ -308,6 +281,7 @@ function App() {
             </div>
           </div>
 
+          {/* Metric cards */}
           <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
             <MetricCard title="Market Cap" value={`$${(data.profile.market_cap / 1e9).toFixed(0)}B`} subtitle="Total market value" />
             <MetricCard title="52-Week High" value={`$${data.price_data.fifty_two_week_high}`} subtitle="Yearly high" />
@@ -315,7 +289,8 @@ function App() {
             <MetricCard title="Volume" value={data.price_data.volume?.toLocaleString()} subtitle="Shares traded today" />
           </div>
 
-<div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
+          {/* Risk assessment */}
+          <div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
             <div style={{ color: "#9ca3af", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "14px" }}>Risk Assessment</div>
             <div style={{ display: "flex", alignItems: "flex-start", gap: "24px", flexWrap: "wrap" }}>
               <RiskGauge score={data.risk.score} label={data.risk.label} color={data.risk.color} />
@@ -330,6 +305,21 @@ function App() {
             </div>
           </div>
 
+          {/* 6 month price chart */}
+          <div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
+            <div style={{ color: "#9ca3af", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "20px" }}>6-Month Stock Price (USD)</div>
+            <ResponsiveContainer width="100%" height={280}>
+              <LineChart data={data.price_history}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f9fafb" />
+                <XAxis dataKey="date" tick={{ fill: "#9ca3af", fontSize: 11 }} interval={19} />
+                <YAxis tick={{ fill: "#9ca3af", fontSize: 11 }} domain={["auto", "auto"]} />
+                <Tooltip formatter={(value) => `$${value}`} />
+                <Line type="monotone" dataKey="close" stroke="#2563eb" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Revenue chart */}
           <div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
             <div style={{ color: "#9ca3af", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "20px" }}>Revenue vs Net Income (Billions USD)</div>
             <ResponsiveContainer width="100%" height={280}>
@@ -344,6 +334,7 @@ function App() {
             </ResponsiveContainer>
           </div>
 
+          {/* Financial table */}
           <div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
             <div style={{ color: "#9ca3af", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "14px" }}>Financial Summary</div>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
@@ -368,6 +359,7 @@ function App() {
             </table>
           </div>
 
+          {/* About */}
           <div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
             <div style={{ color: "#9ca3af", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "12px" }}>About {data.profile.name}</div>
             <p style={{ color: "#374151", lineHeight: "1.7", fontSize: "14px" }}>{data.profile.description}</p>

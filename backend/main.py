@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException # importing the FastAPI class from the fastapi module
 from fastapi.middleware.cors import CORSMiddleware 
-from data_fetcher import get_stock_price, get_company_profile, get_financial_statements # importing functions from the data_fetcher module
+from data_fetcher import get_stock_price, get_company_profile, get_financial_statements, get_price_history
 from risk_scorer import calculate_risk_score
 from database import init_db, save_company, get_recent_searches
 
@@ -24,9 +24,7 @@ app.add_middleware(
 def root():
     return {"message": "RiskRadar API is running"}
 
-@app.get("/api/company/{ticker}") 
-# route for getting company information based on the ticker symbol, 
-#  currently returns a placeholder response indicating that the feature is coming soon
+@app.get("/api/company/{ticker}")
 def get_company(ticker: str):
     ticker = ticker.upper()
     
@@ -36,17 +34,18 @@ def get_company(ticker: str):
     
     price_data = get_stock_price(ticker)
     financials = get_financial_statements(ticker)
-
+    price_history = get_price_history(ticker)
     risk = calculate_risk_score(financials, price_data, profile)
     save_company(ticker, profile, price_data, financials, risk)
 
-
     return {
+        "ticker": ticker,
         "profile": profile,
         "price_data": price_data,
         "financials": financials,
         "risk": risk,
-    }   
+        "price_history": price_history,
+    }
 
 @app.get("/api/compare/{ticker1}/{ticker2}")
 def compare_companies(ticker1: str, ticker2: str):
