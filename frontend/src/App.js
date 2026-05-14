@@ -132,6 +132,85 @@ function CompanyCard({ company }) {
   );
 }
 
+const popularTickers = [
+  { ticker: "AAPL", name: "Apple Inc." },
+  { ticker: "MSFT", name: "Microsoft Corporation" },
+  { ticker: "GOOGL", name: "Alphabet Inc." },
+  { ticker: "AMZN", name: "Amazon.com Inc." },
+  { ticker: "NVDA", name: "NVIDIA Corporation" },
+  { ticker: "META", name: "Meta Platforms Inc." },
+  { ticker: "TSLA", name: "Tesla Inc." },
+  { ticker: "BRK-B", name: "Berkshire Hathaway" },
+  { ticker: "JPM", name: "JPMorgan Chase" },
+  { ticker: "V", name: "Visa Inc." },
+  { ticker: "JNJ", name: "Johnson & Johnson" },
+  { ticker: "WMT", name: "Walmart Inc." },
+  { ticker: "XOM", name: "Exxon Mobil" },
+  { ticker: "MA", name: "Mastercard Inc." },
+  { ticker: "PG", name: "Procter & Gamble" },
+  { ticker: "BAC", name: "Bank of America" },
+  { ticker: "HD", name: "Home Depot" },
+  { ticker: "CVX", name: "Chevron Corporation" },
+  { ticker: "MRK", name: "Merck & Co." },
+  { ticker: "ABBV", name: "AbbVie Inc." },
+  { ticker: "TD", name: "Toronto-Dominion Bank" },
+  { ticker: "RY", name: "Royal Bank of Canada" },
+  { ticker: "BNS", name: "Bank of Nova Scotia" },
+  { ticker: "BMO", name: "Bank of Montreal" },
+  { ticker: "CM", name: "CIBC" },
+  { ticker: "CNR", name: "Canadian National Railway" },
+  { ticker: "SHOP", name: "Shopify Inc." },
+  { ticker: "ENB", name: "Enbridge Inc." },
+  { ticker: "CP", name: "Canadian Pacific Railway" },
+  { ticker: "SU", name: "Suncor Energy" },
+  { ticker: "BABA", name: "Alibaba Group" },
+  { ticker: "TSM", name: "Taiwan Semiconductor" },
+  { ticker: "NVO", name: "Novo Nordisk" },
+  { ticker: "ASML", name: "ASML Holding" },
+  { ticker: "TM", name: "Toyota Motor" },
+  { ticker: "SAP", name: "SAP SE" },
+  { ticker: "NFLX", name: "Netflix Inc." },
+  { ticker: "ADBE", name: "Adobe Inc." },
+  { ticker: "CRM", name: "Salesforce Inc." },
+  { ticker: "ORCL", name: "Oracle Corporation" },
+  { ticker: "INTC", name: "Intel Corporation" },
+  { ticker: "AMD", name: "Advanced Micro Devices" },
+  { ticker: "PYPL", name: "PayPal Holdings" },
+  { ticker: "UBER", name: "Uber Technologies" },
+  { ticker: "ABNB", name: "Airbnb Inc." },
+  { ticker: "COIN", name: "Coinbase Global" },
+  { ticker: "SQ", name: "Block Inc." },
+  { ticker: "PLTR", name: "Palantir Technologies" },
+  { ticker: "GS", name: "Goldman Sachs" },
+  { ticker: "MS", name: "Morgan Stanley" },
+  { ticker: "C", name: "Citigroup Inc." },
+  { ticker: "WFC", name: "Wells Fargo" },
+  { ticker: "AXP", name: "American Express" },
+  { ticker: "BX", name: "Blackstone Inc." },
+  { ticker: "SCHW", name: "Charles Schwab" },
+  { ticker: "CAE", name: "CAE Inc." },
+  { ticker: "BBD-B", name: "Bombardier Inc." },
+  { ticker: "MDA", name: "MDA Space Ltd." },
+  { ticker: "IFC", name: "Intact Financial" },
+];
+
+function SuggestionDropdown({ suggestions, onSelect }) {
+  if (!suggestions.length) return null;
+  return (
+    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "white", border: "1.5px solid #e5e7eb", borderRadius: "8px", marginTop: "4px", zIndex: 100, overflow: "hidden", minWidth: "240px" }}>
+      {suggestions.map((s, i) => (
+        <div key={i} onMouseDown={() => onSelect(s)}
+          style={{ padding: "10px 14px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: i < suggestions.length - 1 ? "1px solid #f9fafb" : "none" }}
+          onMouseEnter={(e) => e.currentTarget.style.background = "#f8faff"}
+          onMouseLeave={(e) => e.currentTarget.style.background = "white"}>
+          <span style={{ fontWeight: "700", color: "#0a0a0a", fontSize: "13px" }}>{s.ticker}</span>
+          <span style={{ color: "#9ca3af", fontSize: "12px" }}>{s.name}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function App() {
   const [ticker, setTicker] = useState("");
   const [data, setData] = useState(null);
@@ -142,6 +221,15 @@ function App() {
   const [ticker1, setTicker1] = useState("");
   const [ticker2, setTicker2] = useState("");
   const [compareData, setCompareData] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const getFiltered = (value) =>
+    popularTickers.filter(
+      (t) =>
+        t.ticker.startsWith(value.toUpperCase()) ||
+        t.name.toLowerCase().startsWith(value.toLowerCase())
+    ).slice(0, 6);
 
   const loadRecent = async () => {
     const response = await fetch("http://127.0.0.1:8000/api/recent");
@@ -158,6 +246,7 @@ function App() {
     setError(null);
     setData(null);
     setCompareData(null);
+    setShowSuggestions(false);
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/company/${ticker}`);
       if (!response.ok) throw new Error("Company not found. Check the ticker symbol.");
@@ -177,6 +266,7 @@ function App() {
     setError(null);
     setData(null);
     setCompareData(null);
+    setShowSuggestions(false);
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/compare/${ticker1}/${ticker2}`);
       if (!response.ok) throw new Error("One or both companies not found.");
@@ -220,18 +310,68 @@ function App() {
             Compare
           </button>
         </div>
+
         {mode === "single" ? (
           <>
-            <input type="text" placeholder="Enter ticker (e.g. AAPL, TD, SHOP)" value={ticker} onChange={(e) => setTicker(e.target.value.toUpperCase())} onKeyDown={(e) => e.key === "Enter" && search()} style={{ background: "white", border: "1.5px solid #e5e7eb", color: "#0a0a0a", padding: "10px 14px", borderRadius: "8px", fontSize: "14px", flex: 1, maxWidth: "380px", outline: "none" }} />
+            <div style={{ position: "relative", flex: 1, maxWidth: "380px" }}>
+              <input
+                type="text"
+                placeholder="Enter ticker (e.g. AAPL, TD, SHOP)"
+                value={ticker}
+                onChange={(e) => {
+                  setTicker(e.target.value.toUpperCase());
+                  setSuggestions(getFiltered(e.target.value));
+                  setShowSuggestions(e.target.value.length > 0 ? "single" : false);
+                }}
+                onKeyDown={(e) => e.key === "Enter" && search()}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                style={{ background: "white", border: "1.5px solid #e5e7eb", color: "#0a0a0a", padding: "10px 14px", borderRadius: "8px", fontSize: "14px", width: "100%", outline: "none" }}
+              />
+              {showSuggestions === "single" && (
+                <SuggestionDropdown suggestions={suggestions} onSelect={(s) => { setTicker(s.ticker); setShowSuggestions(false); }} />
+              )}
+            </div>
             <button onClick={search} style={{ background: "#2563eb", color: "white", border: "none", padding: "10px 22px", borderRadius: "8px", fontSize: "14px", fontWeight: "700", cursor: "pointer" }}>
               {loading ? "Loading..." : "Analyze"}
             </button>
           </>
         ) : (
           <>
-            <input type="text" placeholder="Company A (e.g. AAPL)" value={ticker1} onChange={(e) => setTicker1(e.target.value.toUpperCase())} style={{ background: "white", border: "1.5px solid #e5e7eb", color: "#0a0a0a", padding: "10px 14px", borderRadius: "8px", fontSize: "14px", width: "180px", outline: "none" }} />
+            <div style={{ position: "relative" }}>
+              <input
+                type="text"
+                placeholder="Company A (e.g. AAPL)"
+                value={ticker1}
+                onChange={(e) => {
+                  setTicker1(e.target.value.toUpperCase());
+                  setSuggestions(getFiltered(e.target.value));
+                  setShowSuggestions(e.target.value.length > 0 ? "ticker1" : false);
+                }}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                style={{ background: "white", border: "1.5px solid #e5e7eb", color: "#0a0a0a", padding: "10px 14px", borderRadius: "8px", fontSize: "14px", width: "180px", outline: "none" }}
+              />
+              {showSuggestions === "ticker1" && (
+                <SuggestionDropdown suggestions={suggestions} onSelect={(s) => { setTicker1(s.ticker); setShowSuggestions(false); }} />
+              )}
+            </div>
             <span style={{ fontWeight: "700", color: "#9ca3af" }}>vs</span>
-            <input type="text" placeholder="Company B (e.g. MSFT)" value={ticker2} onChange={(e) => setTicker2(e.target.value.toUpperCase())} style={{ background: "white", border: "1.5px solid #e5e7eb", color: "#0a0a0a", padding: "10px 14px", borderRadius: "8px", fontSize: "14px", width: "180px", outline: "none" }} />
+            <div style={{ position: "relative" }}>
+              <input
+                type="text"
+                placeholder="Company B (e.g. MSFT)"
+                value={ticker2}
+                onChange={(e) => {
+                  setTicker2(e.target.value.toUpperCase());
+                  setSuggestions(getFiltered(e.target.value));
+                  setShowSuggestions(e.target.value.length > 0 ? "ticker2" : false);
+                }}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                style={{ background: "white", border: "1.5px solid #e5e7eb", color: "#0a0a0a", padding: "10px 14px", borderRadius: "8px", fontSize: "14px", width: "180px", outline: "none" }}
+              />
+              {showSuggestions === "ticker2" && (
+                <SuggestionDropdown suggestions={suggestions} onSelect={(s) => { setTicker2(s.ticker); setShowSuggestions(false); }} />
+              )}
+            </div>
             <button onClick={compare} style={{ background: "#2563eb", color: "white", border: "none", padding: "10px 22px", borderRadius: "8px", fontSize: "14px", fontWeight: "700", cursor: "pointer" }}>
               {loading ? "Loading..." : "Compare"}
             </button>
@@ -267,7 +407,6 @@ function App() {
       {data && (
         <div className="fade-in" style={{ maxWidth: "1000px", margin: "28px auto", padding: "0 24px" }}>
 
-          {/* Company header */}
           <div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px", marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
               <h2 style={{ color: "#0a0a0a", fontSize: "26px", fontWeight: "800", letterSpacing: "-0.5px", marginBottom: "4px" }}>{data.profile.name}</h2>
@@ -281,7 +420,6 @@ function App() {
             </div>
           </div>
 
-          {/* Metric cards */}
           <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
             <MetricCard title="Market Cap" value={`$${(data.profile.market_cap / 1e9).toFixed(0)}B`} subtitle="Total market value" />
             <MetricCard title="52-Week High" value={`$${data.price_data.fifty_two_week_high}`} subtitle="Yearly high" />
@@ -289,7 +427,6 @@ function App() {
             <MetricCard title="Volume" value={data.price_data.volume?.toLocaleString()} subtitle="Shares traded today" />
           </div>
 
-          {/* Risk assessment */}
           <div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
             <div style={{ color: "#9ca3af", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "14px" }}>Risk Assessment</div>
             <div style={{ display: "flex", alignItems: "flex-start", gap: "24px", flexWrap: "wrap" }}>
@@ -305,7 +442,6 @@ function App() {
             </div>
           </div>
 
-          {/* 6 month price chart */}
           <div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
             <div style={{ color: "#9ca3af", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "20px" }}>6-Month Stock Price (USD)</div>
             <ResponsiveContainer width="100%" height={280}>
@@ -319,7 +455,6 @@ function App() {
             </ResponsiveContainer>
           </div>
 
-          {/* Revenue chart */}
           <div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
             <div style={{ color: "#9ca3af", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "20px" }}>Revenue vs Net Income (Billions USD)</div>
             <ResponsiveContainer width="100%" height={280}>
@@ -334,7 +469,6 @@ function App() {
             </ResponsiveContainer>
           </div>
 
-          {/* Financial table */}
           <div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
             <div style={{ color: "#9ca3af", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "14px" }}>Financial Summary</div>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
@@ -359,7 +493,6 @@ function App() {
             </table>
           </div>
 
-          {/* About */}
           <div style={{ background: "white", border: "1.5px solid #f0f0f0", borderRadius: "16px", padding: "24px", marginBottom: "16px" }}>
             <div style={{ color: "#9ca3af", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "12px" }}>About {data.profile.name}</div>
             <p style={{ color: "#374151", lineHeight: "1.7", fontSize: "14px" }}>{data.profile.description}</p>
