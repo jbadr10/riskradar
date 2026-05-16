@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, AreaChart, Area } from "recharts";
 
 const globalStyles = document.createElement("style");
@@ -32,6 +32,7 @@ const DIM = "#b8b3cc";
 const SURFACE = "#ffffff";
 const BG = "#f8f7ff";
 const BORDER = "#e8e6f0";
+const API_BASE = "http://127.0.0.1:8000";
 const GREEN = "#059669";
 const AMBER = "#d97706";
 const RED = "#dc2626";
@@ -52,7 +53,7 @@ function RiskBadge({ label, color }) {
 function RiskGauge({ score, label, color }) {
   const gaugeColor = { green: GREEN, yellow: AMBER, red: RED }[color] || AMBER;
   const circumference = Math.PI * 60;
-  const dashOffset = circumference - (Math.min(score / 5, 1)) * circumference;
+  const dashOffset = circumference - (Math.max(0, Math.min(score / 5, 1))) * circumference;
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 20px 12px" }}>
       <div style={{ width: "160px", height: "90px", overflow: "hidden" }}>
@@ -148,7 +149,7 @@ function CompanyCard({ company }) {
             <th style={{ textAlign: "right", padding: "7px 0", color: MUTED, fontWeight: "500" }}>Net Income</th>
           </tr></thead>
           <tbody>
-            {company.financials.map((y) => (
+            {company.financials?.map((y) => (
               <tr key={y.date} style={{ borderBottom: `1px solid ${BORDER}` }}>
                 <td style={{ padding: "9px 0", color: TEXT, fontWeight: "600" }}>{y.date.slice(0, 4)}</td>
                 <td style={{ padding: "9px 0", textAlign: "right", color: MUTED }}>${(y.revenue / 1e9).toFixed(1)}B</td>
@@ -352,23 +353,26 @@ function Dashboard({ onBack }) {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  useEffect(() => { loadRecent(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const getFiltered = (v) => popularTickers.filter(
     (t) => t.ticker.startsWith(v.toUpperCase()) || t.name.toLowerCase().startsWith(v.toLowerCase())
   ).slice(0, 6);
 
   const loadRecent = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/recent");
+      const res = await fetch(`${API_BASE}/api/recent`);
       const result = await res.json();
       setRecent(result.filter((item, i, self) => i === self.findIndex((r) => r.ticker === item.ticker)));
     } catch {}
   };
 
-  const search = async () => {
-    if (!ticker) return;
+  const search = async (tickerOverride) => {
+    const t = tickerOverride ?? ticker;
+    if (!t) return;
     setLoading(true); setError(null); setData(null); setCompareData(null); setShowSuggestions(false);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/company/${ticker}`);
+      const res = await fetch(`${API_BASE}/api/company/${t}`);
       if (!res.ok) throw new Error("Company not found. Check the ticker symbol.");
       setData(await res.json());
       loadRecent();
@@ -380,7 +384,7 @@ function Dashboard({ onBack }) {
     if (!ticker1 || !ticker2) return;
     setLoading(true); setError(null); setData(null); setCompareData(null); setShowSuggestions(false);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/compare/${ticker1}/${ticker2}`);
+      const res = await fetch(`${API_BASE}/api/compare/${ticker1}/${ticker2}`);
       if (!res.ok) throw new Error("One or both companies not found.");
       setCompareData(await res.json());
       loadRecent();
@@ -451,7 +455,7 @@ function Dashboard({ onBack }) {
             <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "10px", flexWrap: "wrap" }}>
               <span style={{ color: DIM, fontSize: "11px", fontWeight: "600" }}>RECENT:</span>
               {recent.slice(0, 5).map((r, i) => (
-                <button key={i} onClick={() => { setTicker(r.ticker); setMode("single"); }}
+                <button key={i} onClick={() => { setTicker(r.ticker); setMode("single"); search(r.ticker); }}
                   style={{ padding: "3px 9px", borderRadius: "5px", fontSize: "11px", fontWeight: "500", cursor: "pointer", border: `1px solid ${BORDER}`, background: "transparent", color: MUTED }}>
                   {r.ticker}
                 </button>
@@ -539,7 +543,7 @@ function Dashboard({ onBack }) {
           <div className="card">
             <SectionLabel>Revenue vs Net Income (Billions USD)</SectionLabel>
             <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={data.financials.map((y) => ({ date: y.date.slice(0, 4), Revenue: parseFloat((y.revenue / 1e9).toFixed(1)), "Net Income": parseFloat((y.net_income / 1e9).toFixed(1)) })).reverse()}>
+              <LineChart data={(data.financials ?? []).map((y) => ({ date: y.date.slice(0, 4), Revenue: parseFloat((y.revenue / 1e9).toFixed(1)), "Net Income": parseFloat((y.net_income / 1e9).toFixed(1)) })).reverse()}>
                 <CartesianGrid strokeDasharray="3 3" stroke={BORDER} />
                 <XAxis dataKey="date" tick={{ fill: MUTED, fontSize: 12 }} />
                 <YAxis tick={{ fill: MUTED, fontSize: 12 }} />
@@ -562,7 +566,7 @@ function Dashboard({ onBack }) {
                 </tr>
               </thead>
               <tbody>
-                {data.financials.map((y) => (
+                {(data.financials ?? []).map((y) => (
                   <tr key={y.date} style={{ borderBottom: `1px solid ${BORDER}` }}>
                     <td style={{ padding: "12px 0", color: TEXT, fontWeight: "600" }}>{y.date.slice(0, 4)}</td>
                     <td style={{ padding: "12px 0", textAlign: "right", color: MUTED }}>${(y.revenue / 1e9).toFixed(1)}B</td>

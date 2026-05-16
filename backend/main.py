@@ -68,6 +68,8 @@ def compare_companies(ticker1: str, ticker2: str):
 
     risk1 = calculate_risk_score(financials1, price_data1, profile1)
     risk2 = calculate_risk_score(financials2, price_data2, profile2)
+    save_company(ticker1, profile1, price_data1, financials1, risk1)
+    save_company(ticker2, profile2, price_data2, financials2, risk2)
 
     return {
         "company1": {

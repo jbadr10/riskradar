@@ -1,10 +1,4 @@
 import yfinance as yf
-from dotenv import load_dotenv 
-import os
-
-load_dotenv()
-
-AV_KEY = os.getenv("ALPHA_VANTAGE_KEY")
 
 def get_company_profile(ticker):
     stock = yf.Ticker(ticker)
