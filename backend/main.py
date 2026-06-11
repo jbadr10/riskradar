@@ -26,28 +26,52 @@ app.add_middleware(
 def root():
     return {"message": "RiskRadar API is running"}
 
+from fastapi import HTTPException
+import traceback
+
 @app.get("/api/company/{ticker}")
 def get_company(ticker: str):
-    ticker = ticker.upper()
-    
-    profile = get_company_profile(ticker)
-    if not profile:
-        raise HTTPException(status_code=404, detail=f"Company {ticker} not found")
-    
-    price_data = get_stock_price(ticker)
-    financials = get_financial_statements(ticker)
-    price_history = get_price_history(ticker)
-    risk = calculate_risk_score(financials, price_data, profile)
-    save_company(ticker, profile, price_data, financials, risk)
+    try:
+        ticker = ticker.upper()
 
-    return {
-        "ticker": ticker,
-        "profile": profile,
-        "price_data": price_data,
-        "financials": financials,
-        "risk": risk,
-        "price_history": price_history,
-    }
+        print("STEP 1: getting profile")
+        profile = get_company_profile(ticker)
+        if not profile:
+            raise HTTPException(status_code=404, detail=f"Company {ticker} not found")
+
+        print("STEP 2: getting stock price")
+        price_data = get_stock_price(ticker)
+
+        print("STEP 3: getting financial statements")
+        financials = get_financial_statements(ticker)
+
+        print("STEP 4: getting price history")
+        price_history = get_price_history(ticker)
+
+        print("STEP 5: calculating risk")
+        risk = calculate_risk_score(financials, price_data, profile)
+
+        # TEMPORARILY DISABLE THIS
+        # print("STEP 6: saving company")
+        # save_company(ticker, profile, price_data, financials, risk)
+
+        print("STEP 7: returning response")
+        return {
+            "ticker": ticker,
+            "profile": profile,
+            "price_data": price_data,
+            "financials": financials,
+            "risk": risk,
+            "price_history": price_history,
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        print("BACKEND ERROR:")
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/compare/{ticker1}/{ticker2}")
 def compare_companies(ticker1: str, ticker2: str):

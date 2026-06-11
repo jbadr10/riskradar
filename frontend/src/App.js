@@ -368,7 +368,7 @@ function Dashboard({ onBack }) {
   };
 
   const search = async (tickerOverride) => {
-    const t = tickerOverride ?? ticker;
+  const t = typeof tickerOverride === "string" ? tickerOverride : ticker;
     if (!t) return;
     setLoading(true); setError(null); setData(null); setCompareData(null); setShowSuggestions(false);
     try {
@@ -424,8 +424,7 @@ function Dashboard({ onBack }) {
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 150)} />
                 {showSuggestions === "single" && <SuggestionDropdown suggestions={suggestions} onSelect={(s) => { setTicker(s.ticker); setShowSuggestions(false); }} />}
               </div>
-              <button onClick={search} style={{ background: PURPLE, color: "white", border: "none", padding: "11px 24px", borderRadius: "8px", fontSize: "14px", fontWeight: "600", cursor: "pointer", whiteSpace: "nowrap" }}>
-                {loading ? "Loading..." : "Analyze"}
+              <button onClick={() => search()} style={{ background: PURPLE, color: "white", border: "none", padding: "11px 24px", borderRadius: "8px", fontSize: "14px", fontWeight: "600", cursor: "pointer", whiteSpace: "nowrap" }}>
               </button>
             </div>
           ) : (
