@@ -35,16 +35,22 @@ I built this project to develop my skills in software engineering, financial dat
 
 ---
 
+## A Note on This Project
+
+I built this project to deepen my backend and data-engineering skills, so my focus was the FastAPI backend: the risk-scoring engine, the data-fetching layer, the SQLite persistence, and the API design. The React frontend was developed with AI assistance, since the goal was a functional interface to surface the backend's analysis rather than a frontend showcase. The financial logic, scoring model, data pipeline, and API are my own work.
+
+---
+
 ## Tech Stack
 
-| Layer           | Technology       |
-| --------------- | ---------------- |
-| Backend         | Python, FastAPI  |
-| Data            | yfinance, pandas |
-| Database        | SQLite           |
-| Frontend        | React            |
-| Charts          | Recharts         |
-| Version Control | Git, GitHub      |
+| Layer           | Technology                           |
+| --------------- | ------------------------------------ |
+| Backend         | Python, FastAPI                      |
+| Data            | yfinance (returns pandas DataFrames) |
+| Database        | SQLite                               |
+| Frontend        | React                                |
+| Charts          | Recharts                             |
+| Version Control | Git, GitHub                          |
 
 ---
 
