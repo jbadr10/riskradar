@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from data_fetcher import get_stock_price, get_company_profile, get_financial_statements, get_price_history
 from risk_scorer import calculate_risk_score
 from database import init_db, save_company, get_recent_searches
-
+import traceback
 
 app = FastAPI() # creating an instance of the FastAPI application
 init_db() # initializing the database by calling the init_db function from the database module
@@ -51,9 +51,12 @@ def get_company(ticker: str):
         print("STEP 5: calculating risk")
         risk = calculate_risk_score(financials, price_data, profile)
 
-        # TEMPORARILY DISABLE THIS
-        # print("STEP 6: saving company")
-        # save_company(ticker, profile, price_data, financials, risk)
+        print("STEP 6: saving company")
+        try: 
+            save_company(ticker, profile, price_data, financials, risk)
+        except Exception:
+            print("WARNING: failed to save search history")
+            traceback.print_exc()
 
         print("STEP 7: returning response")
         return {
@@ -94,8 +97,13 @@ def compare_companies(ticker1: str, ticker2: str):
 
     risk1 = calculate_risk_score(financials1, price_data1, profile1)
     risk2 = calculate_risk_score(financials2, price_data2, profile2)
-    save_company(ticker1, profile1, price_data1, financials1, risk1)
-    save_company(ticker2, profile2, price_data2, financials2, risk2)
+
+    try:
+        save_company(ticker1, profile1, price_data1, financials1, risk1)
+        save_company(ticker2, profile2, price_data2, financials2, risk2)
+    except Exception:
+            print("WARNING: failed to save comparison history")
+            traceback.print_exc()
 
     return {
         "company1": {
