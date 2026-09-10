@@ -12,3 +12,4 @@ backend/.env
 # Node
 frontend/node_modules/
 
+backend/riskradar.db
