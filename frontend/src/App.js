@@ -426,6 +426,7 @@ function Dashboard({ onBack }) {
                 {showSuggestions === "single" && <SuggestionDropdown suggestions={suggestions} onSelect={(s) => { setTicker(s.ticker); setShowSuggestions(false); }} />}
               </div>
               <button onClick={() => search()} style={{ background: PURPLE, color: "white", border: "none", padding: "11px 24px", borderRadius: "8px", fontSize: "14px", fontWeight: "600", cursor: "pointer", whiteSpace: "nowrap" }}>
+              Search
               </button>
             </div>
           ) : (
